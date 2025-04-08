@@ -28,4 +28,38 @@ export const register = async (req, res) => {
     }
 
 }
-export const login =  (req, res) => res.send('login');
+
+export const login = async (req, res) => {
+    const {correo, clave} = req.body;
+    
+    try{
+
+        const doctorFound = await Doctor.findOne({correo});
+        if (!doctorFound) return res.status(400).json({message: 'Usuario no encontrado'});
+        const isMatch = await bcrypt.compare(clave, doctorFound.clave);
+        if (!isMatch) return res.status(400).json({message: 'Contraseña incorrecta'});
+        
+        const token = await createAccessToken({id: doctorFound._id});
+        res.cookie('token', token);
+        res.json({
+            id: doctorFound._id,
+            nombre: doctorFound.nombre,
+            correo: doctorFound.correo,
+            updatedAt: doctorFound.updatedAt,
+        });
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+
+}
+
+export const logout = async (req, res) => {
+    try {
+        res.cookie('token', "", {
+            expires: new Date(0)
+        });
+        res.json({message: 'Logout exitoso'});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
