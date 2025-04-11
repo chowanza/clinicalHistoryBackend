@@ -27,7 +27,7 @@ export const register = async (req, res) => {
         res.status(500).json({message: error.message});
     }
 
-}
+};
 
 export const login = async (req, res) => {
     const {correo, clave} = req.body;
@@ -51,7 +51,7 @@ export const login = async (req, res) => {
         res.status(500).json({message: error.message});
     }
 
-}
+};
 
 export const logout = async (req, res) => {
     try {
@@ -62,4 +62,22 @@ export const logout = async (req, res) => {
     } catch (error) {
         res.status(500).json({message: error.message});
     }
-}
+};
+
+export const profile = async (req, res) => {
+    
+    const doctorFound = await Doctor.findById(req.decoded.id)
+
+    if (!doctorFound) return res.status(400).json({message: "User not found"});
+
+    return res.json({
+        id: doctorFound._id,
+        nombre: doctorFound.nombre,
+        correo: doctorFound.correo,
+        createdAt: doctorFound.createdAt,
+        updatedAt: doctorFound.updatedAt
+    });
+
+    res.send("profile");
+
+};
