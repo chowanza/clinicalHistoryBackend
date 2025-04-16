@@ -3,48 +3,49 @@ import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
 
 export const register = async (req, res) => {
-    const {nombre, correo, clave} = req.body;
+    const {firstName, lastName, email, password, confirmPassword} = req.body;
     
-    try{
-
-        const claveHash = await bcrypt.hash(clave, 10)
+    try {
+        const passwordHash = await bcrypt.hash(password, 10);
         const newDoctor = new Doctor({
-            nombre, 
-            correo, 
-            clave: claveHash,
+            firstName, 
+            lastName,
+            email,
+            password: passwordHash, // Solo guardamos el hash de la contraseña
         });
 
         const doctorSaved = await newDoctor.save();
-        const token = await createAccessToken({id: doctorSaved._id})
-        res.cookie('token', token)
+        const token = await createAccessToken({id: doctorSaved._id});
+        res.cookie('token', token);
         res.json({
             id: doctorSaved._id,
-            nombre: doctorSaved.nombre,
-            correo: doctorSaved.correo,
+            firstName: doctorSaved.firstName,
+            lastName: doctorSaved.lastName,
+            email: doctorSaved.email,
             updatedAt: doctorSaved.updatedAt,
         });
     } catch (error) {
         res.status(500).json({message: error.message});
     }
-
 };
 
 export const login = async (req, res) => {
-    const {correo, clave} = req.body;
+    const {email, password} = req.body;
     
     try{
 
-        const doctorFound = await Doctor.findOne({correo});
+        const doctorFound = await Doctor.findOne({email});
         if (!doctorFound) return res.status(400).json({message: 'Usuario no encontrado'});
-        const isMatch = await bcrypt.compare(clave, doctorFound.clave);
+        const isMatch = await bcrypt.compare(password, doctorFound.password);
         if (!isMatch) return res.status(400).json({message: 'Contraseña incorrecta'});
         
         const token = await createAccessToken({id: doctorFound._id});
         res.cookie('token', token);
         res.json({
             id: doctorFound._id,
-            nombre: doctorFound.nombre,
-            correo: doctorFound.correo,
+            fistName: doctorFound.firstName,
+            lastName: doctorFound.lastName,
+            email: doctorFound.email,
             updatedAt: doctorFound.updatedAt,
         });
     } catch (error) {
@@ -70,14 +71,14 @@ export const profile = async (req, res) => {
 
     if (!doctorFound) return res.status(400).json({message: "User not found"});
 
-    return res.json({
+    res.json({
         id: doctorFound._id,
-        nombre: doctorFound.nombre,
-        correo: doctorFound.correo,
-        createdAt: doctorFound.createdAt,
-        updatedAt: doctorFound.updatedAt
+        firstName: doctorFound.firstName,
+        lastName: doctorFound.lastName,
+        email: doctorFound.email,
+        updatedAt: doctorFound.updatedAt,
+        createdAt: doctorFound.updatedAt
     });
 
-    res.send("profile");
 
 };

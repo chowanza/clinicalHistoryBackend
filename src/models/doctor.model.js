@@ -1,23 +1,29 @@
 import mongoose from "mongoose";
 
 const doctorSchema = new mongoose.Schema({
-    nombre: {
+    firstName: {
         type: String,
         required: true,
         trim: true,
     },
-    correo: {
+    lastName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    email: {
         type: String,
         required: true,
         trim: true,
         unique: true,
     },
-    clave: {
+    password: {
         type: String,
         required: true,
     },
+    // confirmPassword no se almacena, solo se usa para validación
 }, {
     timestamps: true
-})
+});
 
 export default mongoose.model("Doctor", doctorSchema);
