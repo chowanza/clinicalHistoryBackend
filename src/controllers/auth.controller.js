@@ -6,6 +6,8 @@ export const register = async (req, res) => {
     const {firstName, lastName, email, password, confirmPassword} = req.body;
     
     try {
+        const userFound = await Doctor.findOne({email});
+        if (userFound) return res.status(400).json(['The email is already in use']);
         const passwordHash = await bcrypt.hash(password, 10);
         const newDoctor = new Doctor({
             firstName, 
