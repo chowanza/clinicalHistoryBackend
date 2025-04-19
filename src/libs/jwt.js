@@ -1,4 +1,4 @@
-import {TOKEN_SECRET} from "../config.js";
+import {TOKEN_SECRET} from "../config.js"; // es solo un ejemplo, el token debe venir desde la variable de entorno
 import jwt from "jsonwebtoken";
 
 

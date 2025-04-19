@@ -1,6 +1,8 @@
 import Doctor from '../models/doctor.model.js'
 import bcrypt from 'bcryptjs'
 import { createAccessToken } from '../libs/jwt.js'
+import jwt from 'jsonwebtoken'
+import {TOKEN_SECRET} from "../config.js"; // es solo un ejemplo, el token debe venir desde la variable de entorno
 
 export const register = async (req, res) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body
@@ -78,4 +80,24 @@ export const profile = async (req, res) => {
     updatedAt: doctorFound.updatedAt,
     createdAt: doctorFound.updatedAt,
   })
+}
+
+export const verifyToken = async (req, res) => {
+    const token = req.cookies.token
+    console.log(token)
+    if (!token) return res.status(401).json({ message: 'Unauthorized' })
+    jwt.verify(token, TOKEN_SECRET, async (err, decoded) => {
+        if (err) return res.status(401).json({ message: 'Unauthorized' })
+        
+        const userFound = await Doctor.findById(decoded.id)
+        if (!userFound) return res.status(401).json({ message: 'Unauthorized' })
+
+        return res.json({
+            id: userFound._id,
+            firstName: userFound.firstName,
+            lastName: userFound.lastName,
+            email: userFound.email,
+            updatedAt: userFound.updatedAt,
+        })
+    })
 }
